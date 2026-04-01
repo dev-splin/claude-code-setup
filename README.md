@@ -78,38 +78,55 @@ MODEL=$(echo "$input" | jq -r '.model.display_name')
 DIR=$(echo "$input" | jq -r '.workspace.current_dir')
 PCT=$(echo "$input" | jq -r '.context_window.used_percentage // 0' | cut -d. -f1)
 
-IN=$(echo "$input" | jq -r '.context_window.current_usage.input_tokens // 0')
-OUT=$(echo "$input" | jq -r '.context_window.current_usage.output_tokens // 0')
-CACHE_W=$(echo "$input" | jq -r '.context_window.current_usage.cache_creation_input_tokens // 0')
-CACHE_R=$(echo "$input" | jq -r '.context_window.current_usage.cache_read_input_tokens // 0')
-
-fmt() { printf "%'d" "$1" 2>/dev/null || echo "$1"; }
+FIVE_H=$(echo "$input" | jq -r '.rate_limits.five_hour.used_percentage // empty' | cut -d. -f1)
+WEEK=$(echo "$input" | jq -r '.rate_limits.seven_day.used_percentage // empty' | cut -d. -f1)
 
 CYAN='\033[36m'; GREEN='\033[32m'; YELLOW='\033[33m'; RED='\033[31m'
-DIM='\033[2m'; RESET='\033[0m'; BLUE='\033[34m'; MAGENTA='\033[35m'
+RESET='\033[0m'
+PASTEL_CYAN='\033[38;5;117m'; PASTEL_ORANGE='\033[38;5;216m'
+PASTEL_YELLOW='\033[38;5;222m'; PASTEL_RED='\033[38;5;210m'
 
-if [ "$PCT" -ge 90 ]; then BAR_COLOR="$RED"
-elif [ "$PCT" -ge 70 ]; then BAR_COLOR="$YELLOW"
-else BAR_COLOR="$GREEN"; fi
+make_bar() {
+  local pct="$1" base_color="$2"
+  local color
+  if [ "$pct" -ge 90 ]; then color="$PASTEL_RED"
+  elif [ "$pct" -ge 70 ]; then color="$PASTEL_YELLOW"
+  else color="$base_color"; fi
+  local filled=$((pct / 10)) empty=$((10 - pct / 10))
+  local bar
+  bar=$(printf "%${filled}s" | tr ' ' '█')$(printf "%${empty}s" | tr ' ' '░')
+  printf '%s%s%s %s%%' "$color" "$bar" "$RESET" "$pct"
+}
 
-FILLED=$((PCT / 10)); EMPTY=$((10 - FILLED))
-BAR=$(printf "%${FILLED}s" | tr ' ' '█')$(printf "%${EMPTY}s" | tr ' ' '░')
+if [ "$PCT" -ge 90 ]; then CTX_COLOR="$RED"
+elif [ "$PCT" -ge 70 ]; then CTX_COLOR="$YELLOW"
+else CTX_COLOR="$GREEN"; fi
+
+CTX_FILLED=$((PCT / 10)); CTX_EMPTY=$((10 - CTX_FILLED))
+CTX_BAR=$(printf "%${CTX_FILLED}s" | tr ' ' '█')$(printf "%${CTX_EMPTY}s" | tr ' ' '░')
 
 BRANCH=""
 git rev-parse --git-dir > /dev/null 2>&1 && BRANCH=" | 🌿 $(git branch --show-current 2>/dev/null)"
 
 printf "${CYAN}[$MODEL]${RESET} 📁 ${DIR##*/}$BRANCH\n"
-printf "${BAR_COLOR}${BAR}${RESET} ${PCT}%% | ${GREEN}IN $(fmt $IN)${RESET} ${BLUE}OUT $(fmt $OUT)${RESET} ${DIM}📦 +$(fmt $CACHE_W) ♻$(fmt $CACHE_R)${RESET}\n"
+
+LINE2="ctx ${CTX_COLOR}${CTX_BAR}${RESET} ${PCT}%"
+[ -n "$FIVE_H" ] && LINE2="${LINE2} | 5h $(make_bar "$FIVE_H" "$PASTEL_CYAN")"
+[ -n "$WEEK" ]   && LINE2="${LINE2} | 7d $(make_bar "$WEEK" "$PASTEL_ORANGE")"
+
+echo -e "${LINE2}"
 ```
 
 **출력 예시:**
 ```
 [Claude Opus 4.6] 📁 my-project | 🌿 main
-████░░░░░░ 40% | IN 125,000 OUT 3,200 📦 +80,000 ♻45,000
+ctx ████░░░░░░ 40% | 5h ██░░░░░░░░ 15% | 7d ███░░░░░░░ 25%
 ```
 
 - 컨텍스트 사용률에 따라 프로그레스 바 색상 변경 (초록 → 노랑 → 빨강)
-- 현재 모델, 디렉토리, Git 브랜치, 입출력 토큰, 캐시 토큰 표시
+- 현재 모델, 디렉토리, Git 브랜치 표시
+- 5시간/7일 rate limit 사용률을 개별 프로그레스 바로 표시 (사용 가능 시에만 노출)
+- rate limit 바도 70% 이상 노랑, 90% 이상 빨강으로 색상 변경
 
 ## cmux 개발 환경 세팅
 
