@@ -41,4 +41,4 @@ LINE2="ctx ${CTX_COLOR}${CTX_BAR}${RESET} ${PCT}%"
 [ -n "$FIVE_H" ] && LINE2="${LINE2} | 5h $(make_bar "$FIVE_H" "$PASTEL_CYAN")"
 [ -n "$WEEK" ]   && LINE2="${LINE2} | 7d $(make_bar "$WEEK" "$PASTEL_ORANGE")"
 
-echo -e "${LINE2}"
+echo "${LINE2}"
