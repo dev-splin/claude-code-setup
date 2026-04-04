@@ -56,8 +56,8 @@ using-skill/
 
 | 이름 | 철학 | 핵심 특징 | 최적 환경 |
 |------|------|----------|----------|
-| [BMAD](https://github.com/bmad-sim/BMAD-METHOD) | 엔터프라이즈 애자일, 문서 중심 | - PRD → 아키텍처 → 스토리 순서의 무거운 사전 기획<br>- PM/Architect 등 역할별 페르소나 에이전트를 마크다운으로 정의<br>- 문서 샤딩으로 컨텍스트 관리<br>- TDD 선택적<br>- Claude Code, Cursor 등 지원 | 대규모 팀, 감사/컴플라이언스 중요 환경 |
-| [Superpowers](https://github.com/NickBaiworworlds/superpowers) | 개발 규율 강제 (TDD + 코드리뷰) | - 브레인스토밍 → 플랜 → 실행 3단계 워크플로우<br>- TDD 필수 (테스트 없이 코드 쓰면 자동 삭제 후 재시작)<br>- 서브에이전트와 코드리뷰 에이전트 구조<br>- 코어 프롬프트 2K 토큰으로 경량<br>- git worktree 격리 지원<br>- Claude Code 중심 | 스펙 명확, 품질 요구 높은 프로젝트 |
+| [BMAD](https://github.com/bmad-code-org/BMAD-METHOD) | 엔터프라이즈 애자일, 문서 중심 | - PRD → 아키텍처 → 스토리 순서의 무거운 사전 기획<br>- PM/Architect 등 역할별 페르소나 에이전트를 마크다운으로 정의<br>- 문서 샤딩으로 컨텍스트 관리<br>- TDD 선택적<br>- Claude Code, Cursor 등 지원 | 대규모 팀, 감사/컴플라이언스 중요 환경 |
+| [Superpowers](https://github.com/obra/superpowers) | 개발 규율 강제 (TDD + 코드리뷰) | - 브레인스토밍 → 플랜 → 실행 3단계 워크플로우<br>- TDD 필수 (테스트 없이 코드 쓰면 자동 삭제 후 재시작)<br>- 서브에이전트와 코드리뷰 에이전트 구조<br>- 코어 프롬프트 2K 토큰으로 경량<br>- git worktree 격리 지원<br>- Claude Code 중심 | 스펙 명확, 품질 요구 높은 프로젝트 |
 | [GSD](https://github.com/gsd-build/get-shit-done) | 컨텍스트 엔지니어링, 실용주의 | - 탐색 허용하며 점진적 스펙 확정<br>- Goal-Backward 방식 검증<br>- 연구/기획/실행 에이전트 분리 및 독립 태스크 병렬(Wave) 실행<br>- 태스크마다 새 200K 컨텍스트로 컨텍스트 로트 방지<br>- 태스크별 원자적 git 커밋 (자동 revert 가능)<br>- Claude Code, Gemini, Codex, Cursor 등 10개+ 도구 지원 | 솔로 개발자의 탐색적 프로젝트 빠른 배포 |
 
 ## Status Line
