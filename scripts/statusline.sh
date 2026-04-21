@@ -6,7 +6,35 @@ DIR=$(echo "$input" | jq -r '.workspace.current_dir')
 PCT=$(echo "$input" | jq -r '.context_window.used_percentage // 0' | cut -d. -f1)
 
 FIVE_H=$(echo "$input" | jq -r '.rate_limits.five_hour.used_percentage // empty' | cut -d. -f1)
+FIVE_H_RESET=$(echo "$input" | jq -r '.rate_limits.five_hour.resets_at // empty')
 WEEK=$(echo "$input" | jq -r '.rate_limits.seven_day.used_percentage // empty' | cut -d. -f1)
+WEEK_RESET=$(echo "$input" | jq -r '.rate_limits.seven_day.resets_at // empty')
+
+fmt_remaining() {
+  local reset="$1"
+  [ -z "$reset" ] && return
+  local reset_epoch
+  case "$reset" in
+    ''|*[!0-9]*)
+      local clean_iso="${reset%.*}"
+      case "$clean_iso" in *Z) ;; *) clean_iso="${clean_iso}Z" ;; esac
+      reset_epoch=$(TZ=UTC date -j -f "%Y-%m-%dT%H:%M:%SZ" "$clean_iso" "+%s" 2>/dev/null) || \
+        reset_epoch=$(date -d "$reset" "+%s" 2>/dev/null)
+      ;;
+    *)
+      reset_epoch="$reset"
+      ;;
+  esac
+  [ -z "$reset_epoch" ] && return
+  local now diff h m
+  now=$(date "+%s")
+  diff=$((reset_epoch - now))
+  [ "$diff" -le 0 ] && { printf "0m"; return; }
+  h=$((diff / 3600))
+  m=$(((diff % 3600) / 60))
+  if [ "$h" -gt 0 ]; then printf "%dh %dm" "$h" "$m"
+  else printf "%dm" "$m"; fi
+}
 
 CYAN='\033[36m'; GREEN='\033[32m'; YELLOW='\033[33m'; RED='\033[31m'
 RESET='\033[0m'
@@ -38,7 +66,15 @@ git rev-parse --git-dir > /dev/null 2>&1 && BRANCH=" | 🌿 $(git branch --show-
 printf "${CYAN}[$MODEL]${RESET} 📁 ${DIR##*/}$BRANCH\n"
 
 LINE2="ctx ${CTX_COLOR}${CTX_BAR}${RESET} ${PCT}%"
-[ -n "$FIVE_H" ] && LINE2="${LINE2} | 5h $(make_bar "$FIVE_H" "$PASTEL_CYAN")"
-[ -n "$WEEK" ]   && LINE2="${LINE2} | 7d $(make_bar "$WEEK" "$PASTEL_ORANGE")"
+if [ -n "$FIVE_H" ]; then
+  LINE2="${LINE2} | 5h $(make_bar "$FIVE_H" "$PASTEL_CYAN")"
+  FIVE_H_LEFT=$(fmt_remaining "$FIVE_H_RESET")
+  [ -n "$FIVE_H_LEFT" ] && LINE2="${LINE2} (${FIVE_H_LEFT})"
+fi
+if [ -n "$WEEK" ]; then
+  LINE2="${LINE2} | 7d $(make_bar "$WEEK" "$PASTEL_ORANGE")"
+  WEEK_LEFT=$(fmt_remaining "$WEEK_RESET")
+  [ -n "$WEEK_LEFT" ] && LINE2="${LINE2} (${WEEK_LEFT})"
+fi
 
 echo "${LINE2}"
