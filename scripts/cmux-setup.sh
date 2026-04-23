@@ -74,20 +74,42 @@ cmux rename-tab --workspace "$WS_REF" --surface "$RIGHT_TOP" "질문"
 cmux rename-tab --workspace "$WS_REF" --surface "$RIGHT_BOTTOM" "개발 환경 실행"
 sleep 0.3
 
-# ── 4. 오른쪽 아래를 제외한 3개 패널에서 claude 실행 ──
-echo "▶ Claude 실행 (설계, 작업, 질문 패널)"
-cmux send --workspace "$WS_REF" --surface "$LEFT_TOP" $'claude --dangerously-skip-permissions\n'
+# ── 4. 에이전트 실행 (작업 pane은 codex) ──
+echo "▶ 에이전트 실행"
+cmux send --workspace "$WS_REF" --surface "$LEFT_TOP"    $'claude --dangerously-skip-permissions\n'
 sleep 0.3
-cmux send --workspace "$WS_REF" --surface "$LEFT_BOTTOM" $'claude --dangerously-skip-permissions\n'
+cmux send --workspace "$WS_REF" --surface "$LEFT_BOTTOM" $'codex\n'
 sleep 0.3
-cmux send --workspace "$WS_REF" --surface "$RIGHT_TOP" $'claude\n'
+cmux send --workspace "$WS_REF" --surface "$RIGHT_TOP"   $'claude --dangerously-skip-permissions\n'
 sleep 0.3
 
-# ── 5. 알림 전송 ──
+# ── 5. ref를 env 파일로 저장 ──
+CMUX_ENV_DIR="${HOME}/.cmux-workspaces"
+mkdir -p "$CMUX_ENV_DIR"
+ENV_FILE="${CMUX_ENV_DIR}/${WORKSPACE_NAME}.env"
+
+cat > "$ENV_FILE" <<EOF
+# cmux workspace: ${WORKSPACE_NAME}
+# Generated: $(date '+%Y-%m-%d %H:%M:%S')
+export CMUX_WS="${WS_REF}"
+export DESIGN="${LEFT_TOP}"       # 설계 (claude)
+export WORK="${LEFT_BOTTOM}"      # 작업 (codex)
+export ASK="${RIGHT_TOP}"         # 질문 (claude)
+export DEV="${RIGHT_BOTTOM}"      # 개발 환경 실행
+export CMUX_CURRENT_WS="${WORKSPACE_NAME}"
+EOF
+
+echo "▶ ref 저장: ${ENV_FILE}"
+
+# ── 6. 알림 전송 ──
 echo "▶ 알림 전송"
-cmux notify --title "개발 환경 준비완료" --body "설계 + 작업 + 질문 + 개발환경 실행 패널 구성"
+cmux notify --title "개발 환경 준비완료" --body "${WORKSPACE_NAME}: 설계/작업(codex)/질문/개발환경"
 
 echo ""
 echo "✅ 워크스페이스 '${WORKSPACE_NAME}' 환경 세팅 완료!"
-echo "   - 설계 (claude) | 질문 (claude)"
-echo "   - 작업 (claude) | 개발 환경 실행"
+echo "   - 설계 (claude)  |  질문 (claude)"
+echo "   - 작업 (codex)   |  개발 환경 실행"
+echo ""
+echo "💡 셸에서 ref 사용하려면:"
+echo "   cmux-env ${WORKSPACE_NAME}"
+echo "   csend \"\$WORK\" \"리팩터링 시작해줘\""
