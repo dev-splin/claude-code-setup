@@ -7,7 +7,7 @@
 # 사전 준비:
 #   - cmux-setup.sh 가 ~/.cmux-workspaces/<이름>.env 파일을
 #     생성해둔 상태여야 합니다.
-#   - 각 env 파일에는 $DESIGN / $WORK / $ASK / $DEV 같은
+#   - 각 env 파일에는 $DESIGN / $WORK / $ASK / $CMD 같은
 #     surface ref 변수가 export 되어 있습니다.
 #   - ~/.zshrc에 넣은 후 source ~/.zshrc 를 실행하면며 적용됩니다.
 #
@@ -94,7 +94,7 @@ cmux-env() {
   echo "✓ 로드됨: $name ($CMUX_WS)"
   # \$ 로 이스케이프 : echo 가 변수로 확장하지 않고 "$DESIGN" 이라는
   #                    글자 그대로 찍히게 함 (그 뒤 = 뒤쪽은 실제 값)
-  echo "  \$DESIGN=$DESIGN  \$WORK=$WORK  \$ASK=$ASK  \$DEV=$DEV"
+  echo "  \$DESIGN=$DESIGN  \$WORK=$WORK  \$ASK=$ASK  \$CMD=$CMD"
 }
 
 

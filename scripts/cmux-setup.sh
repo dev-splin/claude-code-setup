@@ -71,7 +71,7 @@ echo "▶ 패널 이름 설정"
 cmux rename-tab --workspace "$WS_REF" --surface "$LEFT_TOP" "설계"
 cmux rename-tab --workspace "$WS_REF" --surface "$LEFT_BOTTOM" "작업"
 cmux rename-tab --workspace "$WS_REF" --surface "$RIGHT_TOP" "질문"
-cmux rename-tab --workspace "$WS_REF" --surface "$RIGHT_BOTTOM" "개발 환경 실행"
+cmux rename-tab --workspace "$WS_REF" --surface "$RIGHT_BOTTOM" "터미널"
 sleep 0.3
 
 # ── 4. 에이전트 실행 (작업 pane은 codex) ──
@@ -95,7 +95,7 @@ export CMUX_WS="${WS_REF}"
 export DESIGN="${LEFT_TOP}"       # 설계 (claude)
 export WORK="${LEFT_BOTTOM}"      # 작업 (codex)
 export ASK="${RIGHT_TOP}"         # 질문 (claude)
-export DEV="${RIGHT_BOTTOM}"      # 개발 환경 실행
+export CMD="${RIGHT_BOTTOM}"      # 터미널
 export CMUX_CURRENT_WS="${WORKSPACE_NAME}"
 EOF
 
@@ -105,11 +105,20 @@ echo "▶ ref 저장: ${ENV_FILE}"
 echo "▶ 알림 전송"
 cmux notify --title "개발 환경 준비완료" --body "${WORKSPACE_NAME}: 설계/작업(codex)/질문/개발환경"
 
-echo ""
-echo "✅ 워크스페이스 '${WORKSPACE_NAME}' 환경 세팅 완료!"
-echo "   - 설계 (claude)  |  질문 (claude)"
-echo "   - 작업 (codex)   |  개발 환경 실행"
-echo ""
+# ── 7. 개발 환경 pane에 안내 메시지 출력 ──
+HELP_SCRIPT="${CMUX_ENV_DIR}/${WORKSPACE_NAME}.hint.sh"
+cat > "$HELP_SCRIPT" <<HELP_EOF
+#!/bin/bash
+clear
+echo
+echo "✅ 워크스페이스 '${WORKSPACE_NAME}' (\\\$CMUX_WS) 환경 세팅 완료!"
+echo '   - 설계 (claude) [\$DESIGN]  |  질문 (claude) [\$ASK]'
+echo '   - 작업 (codex)  [\$WORK]    |  터미널 [\$CMD]'
+echo
 echo "💡 셸에서 ref 사용하려면:"
 echo "   cmux-env ${WORKSPACE_NAME}"
-echo "   csend \"\$WORK\" \"리팩터링 시작해줘\""
+echo '   csend "\$WORK" "리팩터링 시작해줘"'
+echo
+HELP_EOF
+chmod +x "$HELP_SCRIPT"
+cmux send --workspace "$WS_REF" --surface "$RIGHT_BOTTOM" "bash '$HELP_SCRIPT'"$'\n'
