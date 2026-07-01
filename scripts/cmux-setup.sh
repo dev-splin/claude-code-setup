@@ -63,14 +63,14 @@ sleep 0.3
 echo ""
 echo "  왼쪽 위 (설계):         ${LEFT_TOP}"
 echo "  왼쪽 아래 (작업):       ${LEFT_BOTTOM}"
-echo "  오른쪽 위 (질문):       ${RIGHT_TOP}"
+echo "  오른쪽 위 (리뷰):       ${RIGHT_TOP}"
 echo "  오른쪽 아래 (개발환경): ${RIGHT_BOTTOM}"
 
 # ── 3. 각 패널 이름 설정 ──
 echo "▶ 패널 이름 설정"
 cmux rename-tab --workspace "$WS_REF" --surface "$LEFT_TOP" '설계[$DESIGN]'
 cmux rename-tab --workspace "$WS_REF" --surface "$LEFT_BOTTOM" '작업[$WORK]'
-cmux rename-tab --workspace "$WS_REF" --surface "$RIGHT_TOP" '질문[$ASK]'
+cmux rename-tab --workspace "$WS_REF" --surface "$RIGHT_TOP" '리뷰[$REVIEW]'
 cmux rename-tab --workspace "$WS_REF" --surface "$RIGHT_BOTTOM" '터미널[$CMD]'
 sleep 0.3
 
@@ -80,7 +80,7 @@ cmux send --workspace "$WS_REF" --surface "$LEFT_TOP"    $'claude --dangerously-
 sleep 0.3
 cmux send --workspace "$WS_REF" --surface "$LEFT_BOTTOM" $'claude --dangerously-skip-permissions\n'
 sleep 0.3
-cmux send --workspace "$WS_REF" --surface "$RIGHT_TOP"   $'claude --dangerously-skip-permissions\n'
+cmux send --workspace "$WS_REF" --surface "$RIGHT_TOP"   $'codex\n'
 sleep 0.3
 
 # ── 5. ref를 env 파일로 저장 ──
@@ -94,7 +94,7 @@ cat > "$ENV_FILE" <<EOF
 export CMUX_WS="${WS_REF}"
 export DESIGN="${LEFT_TOP}"       # 설계 (claude)
 export WORK="${LEFT_BOTTOM}"      # 작업 (claude)
-export ASK="${RIGHT_TOP}"         # 질문 (claude)
+export REVIEW="${RIGHT_TOP}"      # 리뷰 (codex)
 export CMD="${RIGHT_BOTTOM}"      # 터미널
 export CMUX_CURRENT_WS="${WORKSPACE_NAME}"
 EOF
@@ -103,7 +103,7 @@ echo "▶ ref 저장: ${ENV_FILE}"
 
 # ── 6. 알림 전송 ──
 echo "▶ 알림 전송"
-cmux notify --title "개발 환경 준비완료" --body "${WORKSPACE_NAME}: 설계/작업/질문/개발환경"
+cmux notify --title "개발 환경 준비완료" --body "${WORKSPACE_NAME}: 설계/작업/리뷰/개발환경"
 
 # ── 7. 개발 환경 pane에 안내 메시지 출력 ──
 HELP_SCRIPT="${CMUX_ENV_DIR}/${WORKSPACE_NAME}.hint.sh"
@@ -112,7 +112,7 @@ cat > "$HELP_SCRIPT" <<HELP_EOF
 clear
 echo
 echo "✅ 워크스페이스 '${WORKSPACE_NAME}' (\\\$CMUX_WS) 환경 세팅 완료!"
-echo '   - 설계 (claude) [\$DESIGN]  |  질문 (claude) [\$ASK]'
+echo '   - 설계 (claude) [\$DESIGN]  |  리뷰 (codex) [\$REVIEW]'
 echo '   - 작업 (claude) [\$WORK]    |  터미널 [\$CMD]'
 echo
 echo "💡 셸에서 ref 사용하려면:"

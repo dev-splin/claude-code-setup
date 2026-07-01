@@ -112,7 +112,7 @@ source ~/.zshrc
 # 1) 워크스페이스 생성 (패널 구성 + env 파일 저장)
 ~/cmux-setup.sh my-feature
 
-# 2) env 파일을 현재 셸에 로드 → $DESIGN/$WORK/$ASK/$CMD/$CMUX_WS 주입
+# 2) env 파일을 현재 셸에 로드 → $DESIGN/$WORK/$REVIEW/$CMD/$CMUX_WS 주입
 cmux-env my-feature
 
 # 3) 변수 이름으로 pane 에 메시지 전송
@@ -123,20 +123,20 @@ cpaste "$WORK" "이 설계대로 구현해줘"   # 클립보드 내용 전송
 ### 패널 구성
 ```
 ┌──────────────┬──────────────┐
-│  설계        │  질문        │
-│  (claude)    │  (claude)    │
+│  설계        │  리뷰        │
+│  (claude)    │  (codex)     │
 ├──────────────┼──────────────┤
 │  작업        │  터미널      │
-│  (codex)     │  (shell)     │
+│  (claude)    │  (shell)     │
 └──────────────┴──────────────┘
 ```
 
 ### 동작 순서 (cmux-setup.sh)
 1. cmux 워크스페이스 생성 및 이름 설정
 2. 패널 4분할 (right → down × 2)
-3. 각 패널 이름 설정 (설계, 작업, 질문, 터미널)
-4. 에이전트 실행 — 설계/질문은 `claude --dangerously-skip-permissions`, 작업은 `codex`
-5. `~/.cmux-workspaces/<이름>.env` 에 ref 저장 (`$CMUX_WS`, `$DESIGN`, `$WORK`, `$ASK`, `$CMD`)
+3. 각 패널 이름 설정 (설계, 작업, 리뷰, 터미널)
+4. 에이전트 실행 — 설계/작업은 `claude --dangerously-skip-permissions`, 리뷰는 `codex`
+5. `~/.cmux-workspaces/<이름>.env` 에 ref 저장 (`$CMUX_WS`, `$DESIGN`, `$WORK`, `$REVIEW`, `$CMD`)
 6. 완료 알림 전송
 7. 터미널 pane 에 ref 안내 메시지 출력
 
