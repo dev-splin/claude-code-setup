@@ -2,6 +2,7 @@
 input=$(cat)
 
 MODEL=$(echo "$input" | jq -r '.model.display_name')
+EFFORT=$(echo "$input" | jq -r '.effort.level // empty')
 DIR=$(echo "$input" | jq -r '.workspace.current_dir')
 PCT=$(echo "$input" | jq -r '.context_window.used_percentage // 0' | cut -d. -f1)
 
@@ -63,7 +64,10 @@ CTX_BAR=$(printf "%${CTX_FILLED}s" | tr ' ' '█')$(printf "%${CTX_EMPTY}s" | tr
 BRANCH=""
 git rev-parse --git-dir > /dev/null 2>&1 && BRANCH=" | 🌿 $(git branch --show-current 2>/dev/null)"
 
-printf "${CYAN}[$MODEL]${RESET} 📁 ${DIR##*/}$BRANCH\n"
+MODEL_LABEL="$MODEL"
+[ -n "$EFFORT" ] && MODEL_LABEL="${MODEL}(${EFFORT})"
+
+printf "${CYAN}[$MODEL_LABEL]${RESET} 📁 ${DIR##*/}$BRANCH\n"
 
 LINE2="ctx ${CTX_COLOR}${CTX_BAR}${RESET} ${PCT}%"
 if [ -n "$FIVE_H" ]; then
