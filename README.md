@@ -124,7 +124,7 @@ cpaste "$WORK" "이 설계대로 구현해줘"   # 클립보드 내용 전송
 ```
 ┌──────────────┬──────────────┐
 │  설계        │  리뷰        │
-│  (claude)    │  (codex)     │
+│  (claude)    │  (claude)    │
 ├──────────────┼──────────────┤
 │  작업        │  터미널      │
 │  (claude)    │  (shell)     │
@@ -135,7 +135,7 @@ cpaste "$WORK" "이 설계대로 구현해줘"   # 클립보드 내용 전송
 1. cmux 워크스페이스 생성 및 이름 설정
 2. 패널 4분할 (right → down × 2)
 3. 각 패널 이름 설정 (설계, 작업, 리뷰, 터미널)
-4. 에이전트 실행 — 설계/작업은 `claude --dangerously-skip-permissions`, 리뷰는 `codex`
+4. 에이전트 실행 — 설계/작업/리뷰 모두 `claude --dangerously-skip-permissions`
 5. `~/.cmux-workspaces/<이름>.env` 에 ref 저장 (`$CMUX_WS`, `$DESIGN`, `$WORK`, `$REVIEW`, `$CMD`)
 6. 완료 알림 전송
 7. 터미널 pane 에 ref 안내 메시지 출력

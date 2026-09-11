@@ -80,7 +80,7 @@ cmux send --workspace "$WS_REF" --surface "$LEFT_TOP"    $'claude --dangerously-
 sleep 0.3
 cmux send --workspace "$WS_REF" --surface "$LEFT_BOTTOM" $'claude --dangerously-skip-permissions\n'
 sleep 0.3
-cmux send --workspace "$WS_REF" --surface "$RIGHT_TOP"   $'codex\n'
+cmux send --workspace "$WS_REF" --surface "$RIGHT_TOP"   $'claude --dangerously-skip-permissions\n'
 sleep 0.3
 
 # ── 5. ref를 env 파일로 저장 ──
@@ -94,7 +94,7 @@ cat > "$ENV_FILE" <<EOF
 export CMUX_WS="${WS_REF}"
 export DESIGN="${LEFT_TOP}"       # 설계 (claude)
 export WORK="${LEFT_BOTTOM}"      # 작업 (claude)
-export REVIEW="${RIGHT_TOP}"      # 리뷰 (codex)
+export REVIEW="${RIGHT_TOP}"      # 리뷰 (claude)
 export CMD="${RIGHT_BOTTOM}"      # 터미널
 export CMUX_CURRENT_WS="${WORKSPACE_NAME}"
 EOF
@@ -112,7 +112,7 @@ cat > "$HELP_SCRIPT" <<HELP_EOF
 clear
 echo
 echo "✅ 워크스페이스 '${WORKSPACE_NAME}' (\\\$CMUX_WS) 환경 세팅 완료!"
-echo '   - 설계 (claude) [\$DESIGN]  |  리뷰 (codex) [\$REVIEW]'
+echo '   - 설계 (claude) [\$DESIGN]  |  리뷰 (claude) [\$REVIEW]'
 echo '   - 작업 (claude) [\$WORK]    |  터미널 [\$CMD]'
 echo
 echo "💡 셸에서 ref 사용하려면:"
