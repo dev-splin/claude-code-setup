@@ -3,6 +3,7 @@ input=$(cat)
 
 MODEL=$(echo "$input" | jq -r '.model.display_name')
 EFFORT=$(echo "$input" | jq -r '.effort.level // empty')
+API_MS=$(echo "$input" | jq -r '.cost.total_api_duration_ms // empty')
 DIR=$(echo "$input" | jq -r '.workspace.current_dir')
 PCT=$(echo "$input" | jq -r '.context_window.used_percentage // 0' | cut -d. -f1)
 
@@ -37,6 +38,19 @@ fmt_remaining() {
   else printf "%dm" "$m"; fi
 }
 
+fmt_duration() {
+  local ms="$1"
+  [ -z "$ms" ] && return
+  local sec h m s
+  sec=$((ms / 1000))
+  h=$((sec / 3600))
+  m=$(((sec % 3600) / 60))
+  s=$((sec % 60))
+  if [ "$h" -gt 0 ]; then printf "%dh %dm" "$h" "$m"
+  elif [ "$m" -gt 0 ]; then printf "%dm%ds" "$m" "$s"
+  else printf "%ds" "$s"; fi
+}
+
 CYAN='\033[36m'; GREEN='\033[32m'; YELLOW='\033[33m'; RED='\033[31m'
 RESET='\033[0m'
 PASTEL_CYAN='\033[38;5;117m'; PASTEL_ORANGE='\033[38;5;216m'
@@ -67,7 +81,11 @@ git rev-parse --git-dir > /dev/null 2>&1 && BRANCH=" | 🌿 $(git branch --show-
 MODEL_LABEL="$MODEL"
 [ -n "$EFFORT" ] && MODEL_LABEL="${MODEL}(${EFFORT})"
 
-printf "${CYAN}[$MODEL_LABEL]${RESET} 📁 ${DIR##*/}$BRANCH\n"
+API_SEG=""
+API_TIME=$(fmt_duration "$API_MS")
+[ -n "$API_TIME" ] && API_SEG=" ⚡ ${API_TIME}"
+
+printf "${CYAN}[$MODEL_LABEL]${RESET}${API_SEG} 📁 ${DIR##*/}$BRANCH\n"
 
 LINE2="ctx ${CTX_COLOR}${CTX_BAR}${RESET} ${PCT}%"
 if [ -n "$FIVE_H" ]; then

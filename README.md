@@ -79,12 +79,14 @@ claude-code-setup/
 
 **출력 예시:**
 ```
-  [Opus 4.7] 📁 begins | 🌿 feature/harness
+  [Opus 4.7(xhigh)] ⚡ 3m34s 📁 begins | 🌿 feature/harness
   ctx ░░░░░░░░░░ 0% | 5h ░░░░░░░░░░ 2% (3h 2m) | 7d ██░░░░░░░░ 24% (65h 2m)
 ```
 
 - 컨텍스트 사용률에 따라 프로그레스 바 색상 변경 (초록 → 노랑 → 빨강)
 - 현재 모델, 디렉토리, Git 브랜치 표시
+- 모델명 옆에 reasoning effort 레벨 표시 (지원 모델일 때만 노출)
+- ⚡ 세션 누적 API 응답 시간 표시 (모델이 실제로 돌아간 시간, 툴 실행 시간 제외)
 - 5시간/7일 rate limit 사용률을 개별 프로그레스 바로 표시 (사용 가능 시에만 노출)
 - rate limit 바도 70% 이상 노랑, 90% 이상 빨강으로 색상 변경
 
