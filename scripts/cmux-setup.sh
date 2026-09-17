@@ -35,52 +35,44 @@ echo "▶ 워크스페이스 이름 설정: ${WORKSPACE_NAME}"
 cmux workspace-action --action rename --workspace "$WS_REF" --title "$WORKSPACE_NAME"
 sleep 0.3
 
-# ── 2. 패널 구성 (2x2) ──
+# ── 2. 패널 구성 (세로 3분할) ──
 echo "▶ 패널 분할 시작"
 
-# 초기 서피스 확인 (왼쪽 위가 될 패널)
-LEFT_TOP=$(cmux tree --workspace "$WS_REF" 2>&1 | grep -oE 'surface:[0-9]+' | head -1)
-echo "  초기 서피스: ${LEFT_TOP}"
+# 초기 서피스 확인 (왼쪽이 될 패널)
+LEFT=$(cmux tree --workspace "$WS_REF" 2>&1 | grep -oE 'surface:[0-9]+' | head -1)
+echo "  초기 서피스: ${LEFT}"
 
-# 오른쪽으로 분할 → 왼쪽 | 오른쪽
-RIGHT_RESULT=$(cmux new-split right --workspace "$WS_REF" --surface "$LEFT_TOP" 2>&1)
-RIGHT_TOP=$(echo "$RIGHT_RESULT" | grep -oE 'surface:[0-9]+')
-echo "  오른쪽 분할: ${RIGHT_TOP}"
+# 왼쪽에서 오른쪽으로 분할 → 왼쪽 | 가운데
+MIDDLE_RESULT=$(cmux new-split right --workspace "$WS_REF" --surface "$LEFT" 2>&1)
+MIDDLE=$(echo "$MIDDLE_RESULT" | grep -oE 'surface:[0-9]+')
+echo "  가운데 분할: ${MIDDLE}"
 sleep 0.3
 
-# 왼쪽 위에서 아래로 분할
-LEFT_DOWN_RESULT=$(cmux new-split down --workspace "$WS_REF" --surface "$LEFT_TOP" 2>&1)
-LEFT_BOTTOM=$(echo "$LEFT_DOWN_RESULT" | grep -oE 'surface:[0-9]+')
-echo "  왼쪽 아래 분할: ${LEFT_BOTTOM}"
-sleep 0.3
-
-# 오른쪽 위에서 아래로 분할
-RIGHT_DOWN_RESULT=$(cmux new-split down --workspace "$WS_REF" --surface "$RIGHT_TOP" 2>&1)
-RIGHT_BOTTOM=$(echo "$RIGHT_DOWN_RESULT" | grep -oE 'surface:[0-9]+')
-echo "  오른쪽 아래 분할: ${RIGHT_BOTTOM}"
+# 가운데에서 오른쪽으로 분할 → 왼쪽 | 가운데 | 오른쪽
+RIGHT_RESULT=$(cmux new-split right --workspace "$WS_REF" --surface "$MIDDLE" 2>&1)
+RIGHT=$(echo "$RIGHT_RESULT" | grep -oE 'surface:[0-9]+')
+echo "  오른쪽 분할: ${RIGHT}"
 sleep 0.3
 
 echo ""
-echo "  왼쪽 위 (설계):         ${LEFT_TOP}"
-echo "  왼쪽 아래 (작업):       ${LEFT_BOTTOM}"
-echo "  오른쪽 위 (리뷰):       ${RIGHT_TOP}"
-echo "  오른쪽 아래 (개발환경): ${RIGHT_BOTTOM}"
+echo "  왼쪽 (설계):     ${LEFT}"
+echo "  가운데 (작업):   ${MIDDLE}"
+echo "  오른쪽 (리뷰):   ${RIGHT}"
 
 # ── 3. 각 패널 이름 설정 ──
 echo "▶ 패널 이름 설정"
-cmux rename-tab --workspace "$WS_REF" --surface "$LEFT_TOP" '설계[$DESIGN]'
-cmux rename-tab --workspace "$WS_REF" --surface "$LEFT_BOTTOM" '작업[$WORK]'
-cmux rename-tab --workspace "$WS_REF" --surface "$RIGHT_TOP" '리뷰[$REVIEW]'
-cmux rename-tab --workspace "$WS_REF" --surface "$RIGHT_BOTTOM" '터미널[$CMD]'
+cmux rename-tab --workspace "$WS_REF" --surface "$LEFT" '설계[$DESIGN]'
+cmux rename-tab --workspace "$WS_REF" --surface "$MIDDLE" '작업[$WORK]'
+cmux rename-tab --workspace "$WS_REF" --surface "$RIGHT" '리뷰[$REVIEW]'
 sleep 0.3
 
 # ── 4. 에이전트 실행 ──
 echo "▶ 에이전트 실행"
-cmux send --workspace "$WS_REF" --surface "$LEFT_TOP"    $'claude --dangerously-skip-permissions\n'
+cmux send --workspace "$WS_REF" --surface "$LEFT"   $'claude --dangerously-skip-permissions\n'
 sleep 0.3
-cmux send --workspace "$WS_REF" --surface "$LEFT_BOTTOM" $'claude --dangerously-skip-permissions\n'
+cmux send --workspace "$WS_REF" --surface "$MIDDLE" $'claude --dangerously-skip-permissions\n'
 sleep 0.3
-cmux send --workspace "$WS_REF" --surface "$RIGHT_TOP"   $'claude --dangerously-skip-permissions\n'
+cmux send --workspace "$WS_REF" --surface "$RIGHT"  $'claude --dangerously-skip-permissions\n'
 sleep 0.3
 
 # ── 5. ref를 env 파일로 저장 ──
@@ -92,10 +84,9 @@ cat > "$ENV_FILE" <<EOF
 # cmux workspace: ${WORKSPACE_NAME}
 # Generated: $(date '+%Y-%m-%d %H:%M:%S')
 export CMUX_WS="${WS_REF}"
-export DESIGN="${LEFT_TOP}"       # 설계 (claude)
-export WORK="${LEFT_BOTTOM}"      # 작업 (claude)
-export REVIEW="${RIGHT_TOP}"      # 리뷰 (claude)
-export CMD="${RIGHT_BOTTOM}"      # 터미널
+export DESIGN="${LEFT}"       # 설계 (claude)
+export WORK="${MIDDLE}"       # 작업 (claude)
+export REVIEW="${RIGHT}"      # 리뷰 (claude)
 export CMUX_CURRENT_WS="${WORKSPACE_NAME}"
 EOF
 
@@ -103,22 +94,14 @@ echo "▶ ref 저장: ${ENV_FILE}"
 
 # ── 6. 알림 전송 ──
 echo "▶ 알림 전송"
-cmux notify --title "개발 환경 준비완료" --body "${WORKSPACE_NAME}: 설계/작업/리뷰/개발환경"
+cmux notify --title "개발 환경 준비완료" --body "${WORKSPACE_NAME}: 설계/작업/리뷰"
 
-# ── 7. 개발 환경 pane에 안내 메시지 출력 ──
-HELP_SCRIPT="${CMUX_ENV_DIR}/${WORKSPACE_NAME}.hint.sh"
-cat > "$HELP_SCRIPT" <<HELP_EOF
-#!/bin/bash
-clear
-echo
-echo "✅ 워크스페이스 '${WORKSPACE_NAME}' (\\\$CMUX_WS) 환경 세팅 완료!"
-echo '   - 설계 (claude) [\$DESIGN]  |  리뷰 (claude) [\$REVIEW]'
-echo '   - 작업 (claude) [\$WORK]    |  터미널 [\$CMD]'
-echo
+# ── 7. 안내 메시지 출력 ──
+echo ""
+echo "✅ 워크스페이스 '${WORKSPACE_NAME}' (\$CMUX_WS) 환경 세팅 완료!"
+echo '   - 설계 (claude) [$DESIGN] | 작업 (claude) [$WORK] | 리뷰 (claude) [$REVIEW]'
+echo ""
 echo "💡 셸에서 ref 사용하려면:"
 echo "   cmux-env ${WORKSPACE_NAME}"
-echo '   csend "\$WORK" "리팩터링 시작해줘"'
-echo
-HELP_EOF
-chmod +x "$HELP_SCRIPT"
-cmux send --workspace "$WS_REF" --surface "$RIGHT_BOTTOM" "bash '$HELP_SCRIPT'"$'\n'
+echo '   csend "$WORK" "리팩터링 시작해줘"'
+echo ""

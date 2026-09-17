@@ -92,7 +92,7 @@ claude-code-setup/
 
 ## cmux 개발 환경 세팅
 
-cmux 터미널에서 2x2 패널 워크스페이스를 자동 구성하는 스크립트입니다.
+cmux 터미널에서 세로 3분할 패널 워크스페이스를 자동 구성하는 스크립트입니다.
 `scripts/cmux-setup.sh` 와 `scripts/.zshrc` 를 **함께** 사용해야 전체 워크플로우가 동작합니다.
 
 - `cmux-setup.sh` — 워크스페이스/패널 생성 + 에이전트 실행 + `~/.cmux-workspaces/<이름>.env` 파일 저장
@@ -114,7 +114,7 @@ source ~/.zshrc
 # 1) 워크스페이스 생성 (패널 구성 + env 파일 저장)
 ~/cmux-setup.sh my-feature
 
-# 2) env 파일을 현재 셸에 로드 → $DESIGN/$WORK/$REVIEW/$CMD/$CMUX_WS 주입
+# 2) env 파일을 현재 셸에 로드 → $DESIGN/$WORK/$REVIEW/$CMUX_WS 주입
 cmux-env my-feature
 
 # 3) 변수 이름으로 pane 에 메시지 전송
@@ -124,23 +124,22 @@ cpaste "$WORK" "이 설계대로 구현해줘"   # 클립보드 내용 전송
 
 ### 패널 구성
 ```
-┌──────────────┬──────────────┐
-│  설계        │  리뷰        │
-│  (claude)    │  (claude)    │
-├──────────────┼──────────────┤
-│  작업        │  터미널      │
-│  (claude)    │  (shell)     │
-└──────────────┴──────────────┘
+┌──────────────┬──────────────┬──────────────┐
+│  설계        │  작업        │  리뷰        │
+│  (claude)    │  (claude)    │  (claude)    │
+│              │              │              │
+│  $DESIGN     │  $WORK       │  $REVIEW     │
+└──────────────┴──────────────┴──────────────┘
 ```
 
 ### 동작 순서 (cmux-setup.sh)
 1. cmux 워크스페이스 생성 및 이름 설정
-2. 패널 4분할 (right → down × 2)
-3. 각 패널 이름 설정 (설계, 작업, 리뷰, 터미널)
+2. 패널 세로 3분할 (right × 2)
+3. 각 패널 이름 설정 (설계, 작업, 리뷰)
 4. 에이전트 실행 — 설계/작업/리뷰 모두 `claude --dangerously-skip-permissions`
-5. `~/.cmux-workspaces/<이름>.env` 에 ref 저장 (`$CMUX_WS`, `$DESIGN`, `$WORK`, `$REVIEW`, `$CMD`)
+5. `~/.cmux-workspaces/<이름>.env` 에 ref 저장 (`$CMUX_WS`, `$DESIGN`, `$WORK`, `$REVIEW`)
 6. 완료 알림 전송
-7. 터미널 pane 에 ref 안내 메시지 출력
+7. 스크립트를 실행한 셸에 ref 안내 메시지 출력
 
 ### .zshrc 헬퍼 함수
 | 함수 | 설명 |
