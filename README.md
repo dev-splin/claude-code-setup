@@ -135,11 +135,12 @@ cpaste "$WORK" "이 설계대로 구현해줘"   # 클립보드 내용 전송
 ### 동작 순서 (cmux-setup.sh)
 1. cmux 워크스페이스 생성 및 이름 설정
 2. 패널 세로 3분할 (right × 2)
-3. 각 패널 이름 설정 (설계, 작업, 리뷰)
-4. 에이전트 실행 — 설계/작업/리뷰 모두 `claude --dangerously-skip-permissions`
-5. `~/.cmux-workspaces/<이름>.env` 에 ref 저장 (`$CMUX_WS`, `$DESIGN`, `$WORK`, `$REVIEW`)
-6. 완료 알림 전송
-7. 스크립트를 실행한 셸에 ref 안내 메시지 출력
+3. 패널 폭 3등분 보정 — 분할 직후에는 1/2 : 1/4 : 1/4 이므로 왼쪽 경계를 `resize-pane` 으로 밀어 셋 다 1/3 로 맞춤
+4. 각 패널 이름 설정 (설계, 작업, 리뷰)
+5. 에이전트 실행 — 설계/작업/리뷰 모두 `claude --dangerously-skip-permissions`
+6. `~/.cmux-workspaces/<이름>.env` 에 ref 저장 (`$CMUX_WS`, `$DESIGN`, `$WORK`, `$REVIEW`)
+7. 완료 알림 전송
+8. 스크립트를 실행한 셸에 ref 안내 메시지 출력
 
 ### .zshrc 헬퍼 함수
 | 함수 | 설명 |
